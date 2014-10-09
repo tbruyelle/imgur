@@ -17,7 +17,7 @@ func main() {
 	flag.Parse()
 	client = imgur.NewClient(*clientId)
 
-	http.HandleFunc("/random", randomHandler)
+	http.HandleFunc("/", randomHandler)
 	panic(http.ListenAndServe(":8282", nil))
 }
 
