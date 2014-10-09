@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	qs "github.com/google/go-querystring/query"
 	"net/http"
 	"net/url"
 )
@@ -92,8 +93,23 @@ func (c *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
 	return resp, err
 }
 
-func (c *Client) Search(q string) (*SearchResponse, *http.Response, error) {
-	uri := fmt.Sprintf("gallery/search/viral/all/1?q=%s", q)
+// SearchOptions specifies the parameters to the Search method.
+type SearchOptions struct {
+	Query   string `url:"q"`
+	All     string `url:"q_all"`
+	Any     string `url:"q_any"`
+	Exactly string `url:"q_exactly"`
+	Not     string `url:"q_not"`
+	Type    string `url:"q_type"`
+	SizePx  string `url:"q_size_px"`
+}
+
+func (c *Client) Search(opt SearchOptions) (*SearchResponse, *http.Response, error) {
+	params, err := qs.Values(opt)
+	if err != nil {
+		return nil, nil, err
+	}
+	uri := fmt.Sprintf("gallery/search/viral/all/1?%s", params.Encode())
 	req, err := c.NewRequest("GET", uri, nil)
 	if err != nil {
 		return nil, nil, err

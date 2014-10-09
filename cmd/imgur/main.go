@@ -14,10 +14,10 @@ func main() {
 	flag.Parse()
 	c := imgur.NewClient(*clientId)
 
-	s, resp, err := c.Search("cat ext:gif")
+	s, resp, err := c.Search(imgur.SearchOptions{All: "cat", Type: "gif"})
 	if err != nil {
 		fmt.Println(resp, err)
 	} else {
-		fmt.Println(s)
+		fmt.Printf("%+v\n", s)
 	}
 }
