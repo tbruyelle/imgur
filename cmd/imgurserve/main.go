@@ -49,4 +49,5 @@ func randomHandler(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
+	w.Header().Add("Content-Type", "image/gif")
 }
