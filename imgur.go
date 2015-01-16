@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	qs "github.com/google/go-querystring/query"
 	"net/http"
 	"net/url"
+
+	qs "github.com/google/go-querystring/query"
 )
 
 const (
@@ -109,7 +110,7 @@ func (c *Client) Search(opt SearchOptions) (*SearchResponse, *http.Response, err
 	if err != nil {
 		return nil, nil, err
 	}
-	uri := fmt.Sprintf("gallery/search/viral/all/1?%s", params.Encode())
+	uri := fmt.Sprintf("gallery/search?%s", params.Encode())
 	req, err := c.NewRequest("GET", uri, nil)
 	if err != nil {
 		return nil, nil, err
