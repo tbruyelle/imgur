@@ -61,7 +61,7 @@ func (c *Client) Search(opt SearchOptions) (*SearchResponse, *http.Response, err
 		return nil, nil, err
 	}
 	uri := fmt.Sprintf("gallery/search?%s", params.Encode())
-	req, err := c.api.NewRequest("GET", uri, nil)
+	req, err := c.api.NewRequest("GET", uri, nil, nil)
 	if err != nil {
 		return nil, nil, err
 	}
