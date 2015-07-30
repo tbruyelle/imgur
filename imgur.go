@@ -1,13 +1,10 @@
 package imgur
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"net/http"
-	"net/url"
-
 	qs "github.com/google/go-querystring/query"
+	"github.com/tbruyelle/apiclient"
+	"net/http"
 )
 
 const (
@@ -15,9 +12,7 @@ const (
 )
 
 type Client struct {
-	clientId string
-	baseUrl  *url.URL
-	client   *http.Client
+	api *apiclient.API
 }
 
 type Response struct {
@@ -42,56 +37,11 @@ type Image struct {
 }
 
 func NewClient(clientId string) *Client {
-	baseUrl, _ := url.Parse(defaultBaseURL)
-
 	c := &Client{
-		clientId: clientId,
-		client:   http.DefaultClient,
-		baseUrl:  baseUrl,
+		api: apiclient.New(defaultBaseURL),
 	}
+	c.api.Headers["Authorization"] = "Client-Id " + clientId
 	return c
-}
-
-func (c *Client) NewRequest(method, uri string, body interface{}) (*http.Request, error) {
-	rel, err := url.Parse(uri)
-	if err != nil {
-		return nil, err
-	}
-
-	u := c.baseUrl.ResolveReference(rel)
-	buf := new(bytes.Buffer)
-	if body != nil {
-		err := json.NewEncoder(buf).Encode(body)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	req, err := http.NewRequest(method, u.String(), buf)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Authorization", "Client-Id "+c.clientId)
-	return req, nil
-}
-
-func (c *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	defer resp.Body.Close()
-
-	if c := resp.StatusCode; c < 200 || c > 299 {
-		return resp, fmt.Errorf("Server returns status %d", c)
-	}
-
-	if v != nil {
-		err = json.NewDecoder(resp.Body).Decode(v)
-	}
-	return resp, err
 }
 
 // SearchOptions specifies the parameters to the Search method.
@@ -111,13 +61,13 @@ func (c *Client) Search(opt SearchOptions) (*SearchResponse, *http.Response, err
 		return nil, nil, err
 	}
 	uri := fmt.Sprintf("gallery/search?%s", params.Encode())
-	req, err := c.NewRequest("GET", uri, nil)
+	req, err := c.api.NewRequest("GET", uri, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	searchResp := new(SearchResponse)
-	resp, err := c.Do(req, searchResp)
+	resp, err := c.api.Do(req, searchResp)
 	if err != nil {
 		return nil, resp, err
 	}
